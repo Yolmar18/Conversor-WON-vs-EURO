@@ -2,825 +2,156 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Conversor EUR ⇄ KRW | PWA</title>
-  
-  <!-- Manifest & Meta tags for PWA -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Conversor EUR / KRW</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0F172A">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="EUR/KRW">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231E293B'/><text x='50%' y='58%' font-size='42' text-anchor='middle' fill='%2338BDF8' font-weight='bold' font-family='sans-serif'>€₩</text></svg>">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231E293B'/><text x='50%' y='58%' font-size='42' text-anchor='middle' fill='%2338BDF8' font-weight='bold' font-family='sans-serif'>€₩</text></svg>">
-
   <style>
-    :root {
-      --bg: #0b0f19;
-      --card-bg: rgba(22, 30, 49, 0.85);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #38bdf8;
-      --primary-hover: #0284c7;
-      --accent: #f59e0b;
-      --won-color: #34d399;
-      --euro-color: #60a5fa;
-      --online: #10b981;
-      --offline: #ef4444;
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background-color: var(--bg);
-      background-image: 
-        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.12) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.08) 0px, transparent 50%);
-      color: var(--text-main);
-      font-family: var(--font-family);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: env(safe-area-inset-top, 20px) 16px env(safe-area-inset-bottom, 24px) 16px;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 440px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      margin: auto 0;
-    }
-
-    /* Header Bar */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 4px;
-    }
-
-    .header-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--card-border);
-      transition: all 0.3s ease;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: var(--online);
-      box-shadow: 0 0 8px var(--online);
-      transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .status-dot.offline {
-      background-color: var(--offline);
-      box-shadow: 0 0 8px var(--offline);
-    }
-
-    /* Main Converter Card */
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: 24px;
-      padding: 20px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      position: relative;
-    }
-
-    /* Currency Box */
-    .currency-box {
-      background: rgba(15, 23, 42, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: 18px;
-      padding: 16px;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .currency-box:focus-within {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 1px var(--primary);
-    }
-
-    .currency-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-
-    .currency-label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .currency-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .currency-pill.eur {
-      color: var(--euro-color);
-      border: 1px solid rgba(96, 165, 250, 0.25);
-    }
-
-    .currency-pill.krw {
-      color: var(--won-color);
-      border: 1px solid rgba(52, 211, 153, 0.25);
-    }
-
-    .amount-input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-
-    .currency-symbol {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-
-    .amount-input {
-      width: 100%;
-      background: transparent;
-      border: none;
-      outline: none;
-      color: var(--text-main);
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      font-family: inherit;
-    }
-
-    .amount-result {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text-main);
-      overflow-x: auto;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      user-select: all;
-    }
-
-    /* Swap Button */
-    .swap-container {
-      display: flex;
-      justify-content: center;
-      margin: -6px 0;
-      z-index: 2;
-    }
-
-    .swap-btn {
-      background: linear-gradient(135deg, #0284c7, #38bdf8);
-      color: #0b0f19;
-      border: none;
-      border-radius: 9999px;
-      width: 52px;
-      height: 52px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
-      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
-    }
-
-    .swap-btn:active {
-      transform: scale(0.92) rotate(180deg);
-    }
-
-    /* Quick Preset Chips */
-    .chips-row {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-    .chips-row::-webkit-scrollbar {
-      display: none;
-    }
-
-    .chip {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--card-border);
-      color: var(--text-muted);
-      border-radius: 12px;
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-
-    .chip:hover, .chip:active {
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--primary);
-      border-color: rgba(56, 189, 248, 0.3);
-    }
-
-    /* Exchange Rate & Footer Info */
-    .info-footer {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 12px 14px;
-      background: rgba(15, 23, 42, 0.4);
-      border-radius: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
-    }
-
-    .rate-text {
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-main);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .updated-text {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .actions-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 4px;
-    }
-
-    .btn-action {
-      flex: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      color: var(--text-main);
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .btn-action:active {
-      transform: scale(0.97);
-    }
-
-    .btn-action.notify-active {
-      background: rgba(245, 158, 11, 0.15);
-      border-color: rgba(245, 158, 11, 0.35);
-      color: var(--accent);
-    }
-
-    /* Install Banner */
-    .install-banner {
-      display: none;
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.8));
-      border: 1px solid rgba(56, 189, 248, 0.3);
-      border-radius: 16px;
-      padding: 14px 16px;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .install-banner.visible {
-      display: flex;
-    }
-
-    .install-text {
-      font-size: 0.82rem;
-      color: var(--text-main);
-    }
-
-    .install-btn {
-      background: var(--primary);
-      color: #0b0f19;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      font-size: 0.8rem;
-      cursor: pointer;
-    }
-
-    /* Spin animation for refresh */
-    .spin {
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-      100% { transform: rotate(360deg); }
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background-color: #0B0F19; color: #F8FAFC; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: #0F172A; border: 1px solid #1E293B; border-radius: 20px; padding: 28px 24px; width: 100%; max-width: 420px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+    .status-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-size: 0.85rem; color: #94A3B8; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; background: #1E293B; font-weight: 600; font-size: 0.75rem; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #EF4444; }
+    .dot.online { background: #10B981; }
+    .input-group { margin-bottom: 18px; }
+    label { display: block; font-size: 0.8rem; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    .input-box { display: flex; align-items: center; background: #1E293B; border: 1px solid #334155; border-radius: 12px; padding: 12px 16px; }
+    input { background: transparent; border: none; color: #fff; font-size: 1.5rem; font-weight: 600; width: 100%; outline: none; }
+    .currency-tag { font-weight: bold; font-size: 1.1rem; color: #38BDF8; margin-left: 10px; }
+    .swap-btn { display: flex; align-items: center; justify-content: center; margin: 12px auto; background: #334155; border: none; color: #F8FAFC; width: 42px; height: 42px; border-radius: 50%; cursor: pointer; transition: 0.2s; }
+    .swap-btn:active { transform: scale(0.92); }
+    .rate-info { margin-top: 20px; text-align: center; font-size: 0.8rem; color: #64748B; border-top: 1px solid #1E293B; padding-top: 16px; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <div class="header-title">
-        <span>💶⇄₩</span>
-        <span>Conversor EUR/KRW</span>
-      </div>
-      <div class="status-badge" id="statusBadge">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="statusText">Online</span>
-      </div>
-    </header>
 
-    <!-- Main Card -->
-    <main class="card">
-      <!-- From Box -->
-      <div class="currency-box" id="fromBox">
-        <div class="currency-header">
-          <span class="currency-label">Tú entregas</span>
-          <span class="currency-pill eur" id="fromPill">🇪🇺 EUR</span>
-        </div>
-        <div class="amount-input-wrapper">
-          <span class="currency-symbol" id="fromSymbol">€</span>
-          <input 
-            type="number" 
-            id="amountInput" 
-            class="amount-input" 
-            placeholder="0" 
-            value="100" 
-            step="any"
-            inputmode="decimal"
-            autocomplete="off"
-            aria-label="Cantidad a convertir">
-        </div>
-      </div>
+  <div class="card">
+    <div class="status-bar">
+      <span id="rateText">1 EUR = 1,485 KRW</span>
+      <span class="badge">
+        <span class="dot" id="statusDot"></span>
+        <span id="statusText">Comprobando...</span>
+      </span>
+    </div>
 
-      <!-- Swap Button -->
-      <div class="swap-container">
-        <button class="swap-btn" id="swapBtn" title="Invertir dirección (EUR ⇄ KRW)" aria-label="Invertir monedas">
-          ⇄
-        </button>
+    <div class="input-group">
+      <label id="labelFrom">Cantidad en Euros (€)</label>
+      <div class="input-box">
+        <input type="number" id="inputFrom" placeholder="0" inputmode="decimal">
+        <span class="currency-tag" id="symbolFrom">EUR</span>
       </div>
+    </div>
 
-      <!-- To Box -->
-      <div class="currency-box" id="toBox">
-        <div class="currency-header">
-          <span class="currency-label">Tú recibes</span>
-          <span class="currency-pill krw" id="toPill">🇰🇷 KRW</span>
-        </div>
-        <div class="amount-input-wrapper">
-          <span class="currency-symbol" id="toSymbol">₩</span>
-          <div class="amount-result" id="amountResult">0</div>
-        </div>
-      </div>
+    <button class="swap-btn" id="swapBtn" title="Invertir divisa">⇅</button>
 
-      <!-- Quick Preset Chips -->
-      <div class="chips-row" id="chipsRow">
-        <!-- Dynamically injected presets -->
+    <div class="input-group">
+      <label id="labelTo">Resultado en Wones (₩)</label>
+      <div class="input-box">
+        <input type="text" id="inputTo" placeholder="0" readonly>
+        <span class="currency-tag" id="symbolTo">KRW</span>
       </div>
+    </div>
 
-      <!-- Rate & Updated Timestamp -->
-      <div class="info-footer">
-        <div class="rate-text">
-          <span id="rateLabel">Tipo de cambio actual:</span>
-          <strong id="rateValue">1 EUR = 1,480.00 KRW</strong>
-        </div>
-        <div class="updated-text" id="updatedText">
-          Actualizado: Cargando datos...
-        </div>
-      </div>
-
-      <!-- Action Buttons (Refresh + Push Notification Alert) -->
-      <div class="actions-row">
-        <button class="btn-action" id="refreshBtn">
-          <span id="refreshIcon">🔄</span>
-          <span>Actualizar Tasa</span>
-        </button>
-        <button class="btn-action" id="notifyBtn">
-          <span id="notifyIcon">🔔</span>
-          <span id="notifyLabel">Alertas de Cambio</span>
-        </button>
-      </div>
-    </main>
-
-    <!-- Install Banner (Añadir a pantalla de inicio) -->
-    <div class="install-banner" id="installBanner">
-      <div class="install-text">
-        <strong>Instalar Aplicación</strong>
-        <div>Úsala como app nativa, rápida y sin conexión</div>
-      </div>
-      <button class="install-btn" id="installBtn">Instalar</button>
+    <div class="rate-info" id="updateInfo">
+      Tasa guardada localmente para modo offline.
     </div>
   </div>
 
   <script>
-    // Configuration & State
-    const DEFAULT_RATE = 1480.00; // 1 EUR = 1480 KRW (Fallback inicial offline)
-    const STORAGE_KEY_RATE = "eur_krw_rate";
-    const STORAGE_KEY_DATE = "eur_krw_updated_at";
-    const STORAGE_KEY_NOTIFY = "eur_krw_notify_enabled";
-    const STORAGE_KEY_LAST_ALERT_RATE = "eur_krw_last_alert_rate";
+    let rate = parseFloat(localStorage.getItem('eur_krw_rate')) || 1485.0;
+    let mode = 'EUR_TO_KRW';
 
-    let state = {
-      isEurToKrw: true,
-      rate: DEFAULT_RATE, // KRW per 1 EUR
-      updatedAt: null,
-      isOnline: navigator.onLine,
-      notifyEnabled: false,
-      deferredPrompt: null
-    };
+    const inputFrom = document.getElementById('inputFrom');
+    const inputTo = document.getElementById('inputTo');
+    const swapBtn = document.getElementById('swapBtn');
+    const labelFrom = document.getElementById('labelFrom');
+    const labelTo = document.getElementById('labelTo');
+    const symbolFrom = document.getElementById('symbolFrom');
+    const symbolTo = document.getElementById('symbolTo');
+    const rateText = document.getElementById('rateText');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const updateInfo = document.getElementById('updateInfo');
 
-    // DOM Elements
-    const amountInput = document.getElementById("amountInput");
-    const amountResult = document.getElementById("amountResult");
-    const swapBtn = document.getElementById("swapBtn");
-    const fromPill = document.getElementById("fromPill");
-    const toPill = document.getElementById("toPill");
-    const fromSymbol = document.getElementById("fromSymbol");
-    const toSymbol = document.getElementById("toSymbol");
-    const chipsRow = document.getElementById("chipsRow");
-    const rateValue = document.getElementById("rateValue");
-    const updatedText = document.getElementById("updatedText");
-    const statusBadge = document.getElementById("statusBadge");
-    const statusDot = document.getElementById("statusDot");
-    const statusText = document.getElementById("statusText");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const refreshIcon = document.getElementById("refreshIcon");
-    const notifyBtn = document.getElementById("notifyBtn");
-    const installBanner = document.getElementById("installBanner");
-    const installBtn = document.getElementById("installBtn");
-
-    // Initialize from LocalStorage
-    function initStorage() {
-      const savedRate = localStorage.getItem(STORAGE_KEY_RATE);
-      const savedDate = localStorage.getItem(STORAGE_KEY_DATE);
-      const savedNotify = localStorage.getItem(STORAGE_KEY_NOTIFY);
-
-      if (savedRate) {
-        state.rate = parseFloat(savedRate) || DEFAULT_RATE;
-      }
-      if (savedDate) {
-        state.updatedAt = new Date(savedDate);
-      }
-      if (savedNotify === "true") {
-        state.notifyEnabled = true;
-        updateNotifyButtonUI();
-      }
-    }
-
-    // Number Formatters
-    const krwFormatter = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 });
-    const eurFormatter = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const rateFormatter = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-
-    // Update Online/Offline Status Indicator
-    function updateOnlineStatus() {
-      state.isOnline = navigator.onLine;
-      if (state.isOnline) {
-        statusDot.classList.remove("offline");
-        statusText.textContent = "Online";
-        statusBadge.style.borderColor = "rgba(16, 185, 129, 0.4)";
-      } else {
-        statusDot.classList.add("offline");
-        statusText.textContent = "Offline";
-        statusBadge.style.borderColor = "rgba(239, 68, 68, 0.4)";
-      }
-    }
-
-    // Render Quick Amount Preset Chips
-    function renderChips() {
-      chipsRow.innerHTML = "";
-      const presets = state.isEurToKrw 
-        ? [10, 50, 100, 200, 500] 
-        : [10000, 50000, 100000, 500000, 1000000];
-      
-      presets.forEach(val => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "chip";
-        btn.textContent = state.isEurToKrw ? `+${val} €` : `+${(val / 1000)}k ₩`;
-        btn.addEventListener("click", () => {
-          amountInput.value = val;
-          calculateConversion();
-        });
-        chipsRow.appendChild(btn);
-      });
-    }
-
-    // Recalculate and Display Conversion
-    function calculateConversion() {
-      const val = parseFloat(amountInput.value);
+    function calculate() {
+      const val = parseFloat(inputFrom.value);
       if (isNaN(val) || val <= 0) {
-        amountResult.textContent = "0";
+        inputTo.value = '';
         return;
       }
-
-      if (state.isEurToKrw) {
-        // EUR to KRW
-        const converted = val * state.rate;
-        amountResult.textContent = krwFormatter.format(converted);
+      if (mode === 'EUR_TO_KRW') {
+        inputTo.value = Math.round(val * rate).toLocaleString('es-ES');
       } else {
-        // KRW to EUR
-        const converted = val / state.rate;
-        amountResult.textContent = eurFormatter.format(converted);
+        inputTo.value = (val / rate).toFixed(2).replace('.', ',');
       }
     }
 
-    // Update Rates & Footer UI
-    function updateRateDisplay() {
-      rateValue.textContent = `1 EUR = ${rateFormatter.format(state.rate)} KRW`;
-      if (state.updatedAt) {
-        const dateStr = state.updatedAt.toLocaleDateString("es-ES", {
-          day: '2-digit', month: '2-digit', year: 'numeric',
-          hour: '2-digit', minute: '2-digit'
-        });
-        updatedText.textContent = `Tipo de cambio actual: ${rateFormatter.format(state.rate)} (Actualizado: ${dateStr})`;
+    function toggleMode() {
+      mode = (mode === 'EUR_TO_KRW') ? 'KRW_TO_EUR' : 'EUR_TO_KRW';
+      if (mode === 'EUR_TO_KRW') {
+        labelFrom.textContent = 'Cantidad en Euros (€)';
+        symbolFrom.textContent = 'EUR';
+        labelTo.textContent = 'Resultado en Wones (₩)';
+        symbolTo.textContent = 'KRW';
       } else {
-        updatedText.textContent = `Tipo de cambio actual: ${rateFormatter.format(state.rate)} (Tasa predeterminada offline)`;
+        labelFrom.textContent = 'Cantidad en Wones (₩)';
+        symbolFrom.textContent = 'KRW';
+        labelTo.textContent = 'Resultado en Euros (€)';
+        symbolTo.textContent = 'EUR';
       }
+      inputFrom.value = '';
+      inputTo.value = '';
     }
 
-    // Swap Direction
-    function toggleDirection() {
-      state.isEurToKrw = !state.isEurToKrw;
-
-      if (state.isEurToKrw) {
-        fromPill.className = "currency-pill eur";
-        fromPill.textContent = "🇪🇺 EUR";
-        fromSymbol.textContent = "€";
-
-        toPill.className = "currency-pill krw";
-        toPill.textContent = "🇰🇷 KRW";
-        toSymbol.textContent = "₩";
-        if (amountInput.value === "50000" || amountInput.value === "100000") amountInput.value = "100";
-      } else {
-        fromPill.className = "currency-pill krw";
-        fromPill.textContent = "🇰🇷 KRW";
-        fromSymbol.textContent = "₩";
-
-        toPill.className = "currency-pill eur";
-        toPill.textContent = "🇪🇺 EUR";
-        toSymbol.textContent = "€";
-        if (amountInput.value === "100") amountInput.value = "100000";
-      }
-
-      renderChips();
-      calculateConversion();
-    }
-
-    // Fetch Live Exchange Rate from Free Frankfurter API
-    async function fetchExchangeRate(isManual = false) {
+    async function fetchRate() {
       if (!navigator.onLine) {
-        updateOnlineStatus();
-        updateRateDisplay();
-        calculateConversion();
-        if (isManual) {
-          alert("Modo sin conexión. Utilizando la última tasa guardada en el dispositivo.");
-        }
+        setOfflineStatus();
         return;
       }
-
-      if (isManual) {
-        refreshIcon.classList.add("spin");
-      }
-
-      // We query Frankfurter API (free, reliable, no API key required)
-      const endpoints = [
-        "https://api.frankfurter.dev/v1/latest?from=EUR&to=KRW",
-        "https://api.frankfurter.app/latest?from=EUR&to=KRW"
-      ];
-
-      let success = false;
-      let newRate = null;
-
-      for (const url of endpoints) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 6000);
-          const res = await fetch(url, { signal: controller.signal });
-          clearTimeout(timeoutId);
-
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.rates && data.rates.KRW) {
-              newRate = data.rates.KRW;
-              success = true;
-              break;
-            }
-          }
-        } catch (e) {
-          console.warn("Error consultando " + url, e);
+      try {
+        const res = await fetch('https://api.frankfurter.app/latest?from=EUR&to=KRW');
+        const data = await res.json();
+        if (data && data.rates && data.rates.KRW) {
+          rate = data.rates.KRW;
+          localStorage.setItem('eur_krw_rate', rate);
+          const now = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+          localStorage.setItem('eur_krw_time', now);
+          setOnlineStatus(now);
         }
+      } catch (e) {
+        setOfflineStatus();
       }
-
-      if (success && newRate) {
-        const oldRate = state.rate;
-        state.rate = newRate;
-        state.updatedAt = new Date();
-
-        // Save to localStorage
-        localStorage.setItem(STORAGE_KEY_RATE, state.rate.toString());
-        localStorage.setItem(STORAGE_KEY_DATE, state.updatedAt.toISOString());
-
-        updateOnlineStatus();
-        updateRateDisplay();
-        calculateConversion();
-
-        // Check for significant rate change notification (e.g. > 0.5% or test notification)
-        checkRateAlert(oldRate, newRate);
-      } else {
-        // Fallback to localStorage if available
-        const savedRate = localStorage.getItem(STORAGE_KEY_RATE);
-        if (savedRate) {
-          state.rate = parseFloat(savedRate);
-        }
-        updateRateDisplay();
-        calculateConversion();
-      }
-
-      if (isManual) {
-        setTimeout(() => refreshIcon.classList.remove("spin"), 500);
-      }
+      rateText.textContent = `1 EUR = ${Math.round(rate).toLocaleString('es-ES')} KRW`;
+      calculate();
     }
 
-    // Significant Rate Alert Check and Push/Web Notification
-    function checkRateAlert(oldRate, newRate) {
-      if (!state.notifyEnabled || !("Notification" in window) || Notification.permission !== "granted") {
-        return;
-      }
-
-      const lastAlertRate = parseFloat(localStorage.getItem(STORAGE_KEY_LAST_ALERT_RATE)) || oldRate;
-      const diffPercent = Math.abs((newRate - lastAlertRate) / lastAlertRate) * 100;
-
-      // Trigger if variation is >= 0.3%
-      if (diffPercent >= 0.3) {
-        localStorage.setItem(STORAGE_KEY_LAST_ALERT_RATE, newRate.toString());
-        const direction = newRate > lastAlertRate ? "subido 📈" : "bajado 📉";
-        triggerPushNotification(
-          "¡Alerta de cambio EUR/KRW!",
-          `El tipo de cambio ha ${direction} un ${diffPercent.toFixed(2)}%: 1 EUR = ${rateFormatter.format(newRate)} KRW`
-        );
-      }
+    function setOnlineStatus(time) {
+      statusDot.className = 'dot online';
+      statusText.textContent = 'Online';
+      updateInfo.textContent = `Actualizado hoy a las ${time || 'recientemente'}`;
     }
 
-    // Trigger Notification via Service Worker or Web Notification API
-    function triggerPushNotification(title, body) {
-      if (!("Notification" in window) || Notification.permission !== "granted") return;
-
-      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.ready.then(registration => {
-          registration.showNotification(title, {
-            body: body,
-            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%231E293B'/><text x='50%' y='58%' font-size='42' text-anchor='middle' fill='%2338BDF8' font-weight='bold' font-family='sans-serif'>€₩</text></svg>",
-            badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%2338BDF8'/></svg>",
-            vibrate: [200, 100, 200]
-          });
-        });
-      } else {
-        new Notification(title, { body: body });
-      }
+    function setOfflineStatus() {
+      statusDot.className = 'dot';
+      statusText.textContent = 'Offline';
+      const lastTime = localStorage.getItem('eur_krw_time') || 'previa';
+      updateInfo.textContent = `Modo sin conexión. Usando tasa guardada (${lastTime}).`;
     }
 
-    // Toggle Notification Permission
-    async function toggleNotification() {
-      if (!("Notification" in window)) {
-        alert("Las notificaciones no están soportadas en este navegador.");
-        return;
-      }
+    inputFrom.addEventListener('input', calculate);
+    swapBtn.addEventListener('click', toggleMode);
+    window.addEventListener('online', fetchRate);
+    window.addEventListener('offline', setOfflineStatus);
 
-      if (Notification.permission === "default") {
-        const permission = await Notification.requestPermission();
-        if (permission === "granted") {
-          state.notifyEnabled = true;
-          localStorage.setItem(STORAGE_KEY_NOTIFY, "true");
-          localStorage.setItem(STORAGE_KEY_LAST_ALERT_RATE, state.rate.toString());
-          updateNotifyButtonUI();
-          triggerPushNotification(
-            "Alertas activadas 🔔",
-            `Recibirás avisos cuando el tipo de cambio EUR/KRW cambie significativamente. Tasa base: 1 EUR = ${rateFormatter.format(state.rate)} KRW`
-          );
-        }
-      } else if (Notification.permission === "granted") {
-        state.notifyEnabled = !state.notifyEnabled;
-        localStorage.setItem(STORAGE_KEY_NOTIFY, state.notifyEnabled ? "true" : "false");
-        updateNotifyButtonUI();
-        if (state.notifyEnabled) {
-          triggerPushNotification("Alertas EUR/KRW", "Monitoreo de tipo de cambio activado.");
-        }
-      } else {
-        alert("Permiso de notificaciones bloqueado. Actívalas en la configuración de tu navegador.");
-      }
+    fetchRate();
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
     }
-
-    function updateNotifyButtonUI() {
-      if (state.notifyEnabled) {
-        notifyBtn.classList.add("notify-active");
-        document.getElementById("notifyLabel").textContent = "Alertas Activas";
-      } else {
-        notifyBtn.classList.remove("notify-active");
-        document.getElementById("notifyLabel").textContent = "Alertas de Cambio";
-      }
-    }
-
-    // PWA Install prompt handling
-    window.addEventListener("beforeinstallprompt", (e) => {
-      e.preventDefault();
-      state.deferredPrompt = e;
-      installBanner.classList.add("visible");
-    });
-
-    installBtn.addEventListener("click", async () => {
-      if (!state.deferredPrompt) return;
-      state.deferredPrompt.prompt();
-      const { outcome } = await state.deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        installBanner.classList.remove("visible");
-      }
-      state.deferredPrompt = null;
-    });
-
-    // Event Listeners
-    amountInput.addEventListener("input", calculateConversion);
-    swapBtn.addEventListener("click", toggleDirection);
-    refreshBtn.addEventListener("click", () => fetchExchangeRate(true));
-    notifyBtn.addEventListener("click", toggleNotification);
-
-    window.addEventListener("online", () => {
-      updateOnlineStatus();
-      fetchExchangeRate(false);
-    });
-
-    window.addEventListener("offline", () => {
-      updateOnlineStatus();
-    });
-
-    // Register Service Worker for Offline & PWA support
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js")
-          .then(reg => console.log("Service Worker registrado con éxito:", reg.scope))
-          .catch(err => console.log("Error al registrar Service Worker:", err));
-      });
-    }
-
-    // App Initialization
-    initStorage();
-    updateOnlineStatus();
-    renderChips();
-    updateRateDisplay();
-    calculateConversion();
-    fetchExchangeRate(false);
-
-    // Periodic check every 5 minutes if online
-    setInterval(() => {
-      if (navigator.onLine) fetchExchangeRate(false);
-    }, 5 * 60 * 1000);
   </script>
 </body>
 </html>
